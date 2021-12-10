@@ -18,6 +18,8 @@ mongoDB_Connect.Db_connection();
 app.get('/ping', (req, res) => {
     res.status(300).json({ msg: 'Welcome to our banking system' });
 });
+app.use('/admin', require('./routes/admin'));
+app.use('/user', require('./routes/user'));
 
 // Not found route - 404
 app.use('**', (req, res) => {
