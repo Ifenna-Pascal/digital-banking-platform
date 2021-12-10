@@ -2,7 +2,7 @@
 const express = require('express');
 const morgan = require('morgan');
 require('dotenv').config({ path: './config/config.env' });
-
+const mongoDB_Connect = require('./config/db_connection');
 // initialize the app
 const app = express();
 
@@ -10,6 +10,9 @@ const app = express();
 app.use(morgan('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+
+// Connect to Database
+mongoDB_Connect.Db_connection();
 
 // Routes
 app.get('/ping', (req, res) => {
