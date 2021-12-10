@@ -4,15 +4,29 @@
   "description": "a seamless banking system that allows for seamless transactions",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon server",
+    "format": "prettier --write ./**/**.js"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "npm run lint"
+    }
   },
   "author": "Monanu Ifenna",
   "license": "ISC",
   "dependencies": {
     "bcrypt": "^5.0.1",
     "dotenv": "^10.0.0",
+    "eslint": "^8.4.1",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-prettier": "^4.0.0",
     "express": "^4.17.1",
+    "husky": "^7.0.4",
     "jsonwebtoken": "^8.5.1",
-    "mongoose": "^6.1.0"
+    "mongoose": "^6.1.0",
+    "morgan": "^1.10.0",
+    "nodemon": "^2.0.15",
+    "prettier": "^2.5.1"
   }
 }
