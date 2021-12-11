@@ -11,7 +11,6 @@ class admin_service {
         console.log(data.password);
         try {
             const user = await this.find_user_by_email(data.email);
-            console.log(user);
             if (user) throw new Error('user already exist in database');
             const new_user = User.create(data);
             return new_user;

@@ -1,6 +1,6 @@
 const router = require('express').Router();
 const { body, check } = require('express-validator');
-const { login, setPin } = require('../controller/user');
+const { login, setPin, view_transactions } = require('../controller/user');
 const auth = require('../middlewares/auth');
 
 router.post(
@@ -22,10 +22,12 @@ router.post(
         .not()
         .isEmpty()
         .withMessage('transaction pin is required')
-        .isLength({ min: 4 })
+        .isLength({ min: 4, max: 4 })
         .withMessage('pin should be 4 letter'),
     auth(),
     setPin,
 );
+
+router.get('/transactions', auth(), view_transactions);
 
 module.exports = router;

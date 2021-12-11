@@ -25,7 +25,7 @@ transaction_controller.withdrawal = async (req, res) => {
     }
     try {
         const withdrawal = await withdrawal_transaction(data, req.USER_ID);
-        res.status(200).json({ msg: 'Withdrawal Transaction Completed Successfully', details: withdrawal });
+        res.status(200).json({ details: withdrawal });
     } catch (error) {
         res.status(400).json({ msg: 'Withdrawal Error occured', error: error });
     }

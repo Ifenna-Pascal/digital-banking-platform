@@ -1,5 +1,6 @@
 const User = require('../model/user');
 const JWT_SECRET = process.env.JWT_SECRET;
+const Transaction = require('../model/transaction');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 
@@ -33,6 +34,11 @@ class user_service {
             token: token,
         };
         return user_data;
+    }
+
+    async view_all_user_transactions(id) {
+        const user_transactions = await Transaction.find({ user_id: id });
+        return user_transactions;
     }
 }
 

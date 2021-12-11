@@ -46,10 +46,10 @@ class transaction_service {
         };
     }
 
-    
     async withdrawal_transaction(data, id) {
         const user = await User.findOne({ _id: id });
-        if(user.account_details.account_balance < parseInt(data.amount)) return 'you do not have enough balance for your withdrwal'
+        if (user.account_details.account_balance < parseInt(data.amount))
+            return 'you do not have enough balance for your withdrwal';
         const transaction_data = {
             user_id: id,
             transaction_id: randomly_generated_transaction_id(),
@@ -65,6 +65,7 @@ class transaction_service {
         user.account_details.account_balance -= data.amount;
         const saved_user = await user.save();
         return {
+            msg: ' Withdrawal transaction completed successfully',
             saved_transaction,
             saved_user,
         };

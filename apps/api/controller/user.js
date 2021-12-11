@@ -35,4 +35,13 @@ user_controller.setPin = async (req, res) => {
     }
 };
 
+user_controller.view_transactions = async (req, res) => {
+    try {
+        const user_transactions = await user_service.view_all_user_transactions(req.USER_ID);
+        res.status(200).json({ msg: 'All your transactions', user_transactions: user_transactions });
+    } catch (error) {
+        res.status(400).json({ msg: 'Error occured', error: error });
+    }
+};
+
 module.exports = user_controller;
