@@ -10,13 +10,20 @@ class user_service {
             return user;
         };
     }
-    async user_login(data) {
+
+    async update_pin(id, pin) {
+        console.log(pin, id);
+        const setPin = await User.findByIdAndUpdate(id, { $set: { transaction_pin: pin } }, { new: true });
+        return setPin;
+    }
+
+    async user_login(data, next) {
         const user = await this.find_user_by_email(data.email);
         console.log(user);
         if (!user) throw new Error('Invalid Email and Password');
         const isValidPassword = await bcrypt.compare(data.password, user.password);
         console.log(isValidPassword);
-        if (!isValidPassword) throw new Error('Password does not match');
+        if (!isValidPassword) throw next(new Error('Password does not match'));
         // sign token
         const token = jwt.sign({ user_id: user._id }, JWT_SECRET);
         const user_data = {

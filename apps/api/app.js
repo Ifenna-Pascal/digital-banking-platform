@@ -20,6 +20,7 @@ app.get('/ping', (req, res) => {
 });
 app.use('/admin', require('./routes/admin'));
 app.use('/user', require('./routes/user'));
+app.use('/transaction', require('./routes/transaction'));
 
 // Not found route - 404
 app.use('**', (req, res) => {

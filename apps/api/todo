@@ -1,0 +1,10 @@
+Transaction
+/transaction/deposit:
+find user by req.user.id,
+find user and check if user isActive
+check if user pin exists;
+if not user creates pin for transaction
+check if pin inserted is equal to the pin of the user
+
+Deposit Logic
+1. add to the transaction

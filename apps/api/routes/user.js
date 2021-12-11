@@ -1,6 +1,7 @@
 const router = require('express').Router();
 const { body, check } = require('express-validator');
-const { login } = require('../controller/user');
+const { login, setPin } = require('../controller/user');
+const auth = require('../middlewares/auth');
 
 router.post(
     '/signin',
@@ -13,6 +14,18 @@ router.post(
         .normalizeEmail(),
     check('password').not().isEmpty().withMessage('password is required'),
     login,
+);
+
+router.post(
+    '/setpin',
+    body('pin')
+        .not()
+        .isEmpty()
+        .withMessage('transaction pin is required')
+        .isLength({ min: 4 })
+        .withMessage('pin should be 4 letter'),
+    auth(),
+    setPin,
 );
 
 module.exports = router;

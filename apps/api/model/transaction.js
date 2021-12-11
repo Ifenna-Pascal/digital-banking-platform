@@ -36,32 +36,16 @@ const transactionSchema = new Schema({
         type: Number,
         required: [true, 'your current balance is required'],
     },
-    transaction_naration: {
+    transaction_narration: {
         type: String,
-    },
-    transaction_pin: {
-        type: Number,
-        required: [true, 'your transaction pin is required'],
-        minlength: 4,
     },
     from: {
         type: mongoose.Types.ObjectId,
         ref: 'User',
-        required: [true, 'user id is required'],
     },
     to: {
         type: mongoose.Types.ObjectId,
         ref: 'User',
-        required: [true, 'user id is required'],
     },
 });
-
-transactionSchema.pre('save', async function (next) {
-    var user = this;
-    if (!user.isModified('transaction_pin')) return next();
-    const hashed_pin = await Hash(user.transaction_pin);
-    user.transaction_pin = hashed_pin;
-    next();
-});
-
 module.exports = mongoose.model('transaction', transactionSchema);

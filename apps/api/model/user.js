@@ -44,6 +44,10 @@ const userSchema = new Schema({
         default: true,
     },
 
+    transaction_pin: {
+        type: String,
+    },
+
     account_details: {
         account_balance: {
             type: Number,
