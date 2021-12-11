@@ -11,9 +11,9 @@ transaction_controller.deposit = async (req, res) => {
     }
     try {
         const deposit = await deposit_transaction(data, req.USER_ID);
-        res.status(200).json({ msg: ' Deposit Transaction Completed Successfully', details: deposit });
+        res.status(200).json({ msg: ' Deposit Transactions Completed Successfully', details: deposit });
     } catch (error) {
-        res.status(400).json({ msg: 'Deposit Error occured', error: error });
+        res.status(400).json({ msg: 'Deposit error occured', error: error });
     }
 };
 
