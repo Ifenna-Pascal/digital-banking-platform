@@ -1,7 +1,7 @@
 // all imports
 const express = require('express');
 const morgan = require('morgan');
-require('dotenv').config({ path: './config/config.env' });
+require('dotenv').config({ path: '.env' });
 const mongoDB_Connect = require('./config/db_connection');
 // initialize the app
 const app = express();
