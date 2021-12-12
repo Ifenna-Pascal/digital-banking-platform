@@ -106,7 +106,6 @@ class transaction_service {
             from: id,
             to: beneficiary._id,
         };
-        console.log(transaction_data, 'dataaaa');
         const new_transaction = await transaction_repository_instance.create_transaction(transaction_data);
         console.log(new_transaction, 'newwww');
         if (!new_transaction) throw new Error('Transaction not created');

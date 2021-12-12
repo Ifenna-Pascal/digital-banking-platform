@@ -15,6 +15,11 @@ class transactionRepository {
         const transaction = await Transaction.findById(id);
         return transaction;
     }
+
+    async delete_transaction (id) {
+        const deleted_transaction = await Transaction.findByIdAndDelete(id);
+        return deleted_transaction;
+    }
 }
 
 module.exports = new transactionRepository();

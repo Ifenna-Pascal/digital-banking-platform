@@ -1,6 +1,6 @@
 const router = require('express').Router();
 const { body, check } = require('express-validator');
-const { create_user, delete_user, disable_user, enable_user } = require('../controller/admin');
+const { create_user, delete_user, disable_user, enable_user, reversed_transaction } = require('../controller/admin');
 const admin = require('../middlewares/admin');
 const auth = require('../middlewares/auth');
 
@@ -25,5 +25,7 @@ router.delete('/delete_user/:id', auth(), admin(), delete_user );
 router.put('/disable_user/:id', auth(), admin(), disable_user );
 
 router.put('/enable_user/:id', auth(), admin(), enable_user );
+
+router.put('/reverse_transaction/:id', auth(), admin(), reversed_transaction )
 
 module.exports = router;
