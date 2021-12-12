@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const Hash = require('../utility/bycrpt_hashing');
+const Hash = require('../../utility/bycrpt_hashing');
 const Schema = mongoose.Schema;
 const transactionSchema = new Schema({
     user_id: {
@@ -47,5 +47,11 @@ const transactionSchema = new Schema({
         type: mongoose.Types.ObjectId,
         ref: 'User',
     },
+
+    created_At: {
+        type: Date,
+        default: new Date()
+    }
+
 });
 module.exports = mongoose.model('transaction', transactionSchema);

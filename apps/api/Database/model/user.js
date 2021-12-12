@@ -1,7 +1,7 @@
 // all imports
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
-const Hash = require('../utility/bycrpt_hashing');
+const Hash = require('../../utility/bycrpt_hashing');
 
 // user detail parent schema definition
 const userSchema = new Schema({

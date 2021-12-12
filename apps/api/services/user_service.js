@@ -1,30 +1,23 @@
-const User = require('../model/user');
+const user_repository_instance = require('../Database/Repository/userRepo');
+const transaction_repository_instance = require('../Database/Repository/transactionRepo');
+const Hash = require('../utility/bycrpt_hashing');
 const JWT_SECRET = process.env.JWT_SECRET;
-const Transaction = require('../model/transaction');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 
 class user_service {
-    constructor() {
-        this.find_user_by_email = async (email) => {
-            const user = await User.findOne({ email: email });
-            return user;
-        };
-    }
-
     async update_pin(id, pin) {
-        console.log(pin, id);
-        const setPin = await User.findByIdAndUpdate(id, { $set: { transaction_pin: pin } }, { new: true });
+        const hashed_pin = await Hash(pin.toString());
+        const setPin = await user_repository_instance.update_pin(id, hashed_pin);
         return setPin;
     }
 
-    async user_login(data, next) {
-        const user = await this.find_user_by_email(data.email);
-        console.log(user);
+    async user_login(data) {
+        const { email } = data;
+        const user = await user_repository_instance.find_user_by_email(email);
         if (!user) throw new Error('Invalid Email and Password');
         const isValidPassword = await bcrypt.compare(data.password, user.password);
-        console.log(isValidPassword);
-        if (!isValidPassword) throw next(new Error('Password does not match'));
+        if (!isValidPassword) throw new Error('Password does not match');
         // sign token
         const token = jwt.sign({ user_id: user._id }, JWT_SECRET);
         const user_data = {
@@ -37,7 +30,7 @@ class user_service {
     }
 
     async view_all_user_transactions(id) {
-        const user_transactions = await Transaction.find({ user_id: id });
+        const user_transactions = await transaction_repository_instance.view_all_user_transactions(id);
         return user_transactions;
     }
 }

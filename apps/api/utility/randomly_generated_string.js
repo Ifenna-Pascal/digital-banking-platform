@@ -32,5 +32,3 @@ module.exports = {
     randomly_generated_transaction_id,
     randomly_generated_password,
 };
-
-console.log(randomly_generated_transaction_id());
