@@ -20,12 +20,12 @@ router.post(
     create_user,
 );
 
-router.delete('/delete_user/:id', auth(), admin(), delete_user );
+router.delete('/delete_user/:id', auth(), admin(), delete_user);
 
-router.put('/disable_user/:id', auth(), admin(), disable_user );
+router.put('/disable_user/:id', auth(), admin(), disable_user);
 
-router.put('/enable_user/:id', auth(), admin(), enable_user );
+router.put('/enable_user/:id', auth(), admin(), enable_user);
 
-router.put('/reverse_transaction/:id', auth(), admin(), reversed_transaction )
+router.put('/reverse_transaction/:id', auth(), admin(), reversed_transaction);
 
 module.exports = router;

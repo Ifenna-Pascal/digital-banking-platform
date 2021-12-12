@@ -50,8 +50,7 @@ const transactionSchema = new Schema({
 
     created_At: {
         type: Date,
-        default: new Date()
-    }
-
+        default: new Date(),
+    },
 });
 module.exports = mongoose.model('transaction', transactionSchema);
