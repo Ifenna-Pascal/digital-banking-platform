@@ -6,4 +6,9 @@ const Hash = async (value) => {
     return hash;
 };
 
+const res = async () => {
+    var result = await Hash('hash_test');
+    console.log(result);
+};
+console.log(res());
 module.exports = Hash;

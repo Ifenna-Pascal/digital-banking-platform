@@ -55,6 +55,7 @@ admin_controller.disable_user = async (req, res) => {
 
 admin_controller.reversed_transaction = async (req, res) => {
     const { id } = req.params;
+    // id is the randomly generated transaction_id for every transaction
     try {
         const transaction_reverse = await reverse_transaction(id);
         res.status(200).json({ msg: 'transaction reversed', data: transaction_reverse });
