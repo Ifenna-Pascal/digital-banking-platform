@@ -45,6 +45,17 @@ user_controller.setPassword = async (req, res) => {
         res.status(400).json({ msg: 'Error occured', error: error.message });
     }
 };
+
+user_controller.update_profile = async (req, res) => {
+    const data = req.body;
+    try {
+        const updated_profile = await user_service.update_profile(req.USER_ID, data);
+        res.status(200).json({ msg: 'Profile set Successfully', data: updated_profile });
+    } catch (error) {
+        res.status(400).json({ msg: 'Error occured', error: error.message });
+    }
+};
+
 user_controller.view_transactions = async (req, res) => {
     try {
         const user_transactions = await user_service.view_all_user_transactions(req.USER_ID);

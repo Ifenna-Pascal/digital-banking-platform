@@ -33,6 +33,12 @@ class user_service {
         return user_data;
     }
 
+    async update_profile(id, data) {
+        const updated_user = await user_repository_instance.update_profile(id, data);
+        if (!updated_user) throw new Error('user profile can not be updated');
+        return updated_user;
+    }
+
     async update_password(email, password) {
         const user = await user_repository_instance.find_user_by_email(email);
         if (!user) throw new Error('user does not exist in database');

@@ -32,6 +32,16 @@ class userRepository {
         return disable_user;
     }
 
+    async update_profile(id, data) {
+        const { first_name, last_name, email } = data;
+        const updated_user = await User.findByIdAndUpdate(
+            id,
+            { $set: { first_name: first_name, last_name: last_name, email: email } },
+            { new: true },
+        );
+        return updated_user;
+    }
+
     async enable_user(id) {
         const enable_user = await User.findByIdAndUpdate(id, { $set: { isActive: true } }, { new: true });
         return enable_user;
