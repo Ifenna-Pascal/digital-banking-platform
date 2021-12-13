@@ -46,6 +46,15 @@ class userRepository {
         return updated_user_amount;
     }
 
+    async update_password(email, password) {
+        const setPassword = await User.findOneAndUpdate(
+            { email: email },
+            { $set: { password: password } },
+            { new: true },
+        );
+        return setPassword;
+    }
+
     async delete_user(id) {
         const deleted_user = await User.findByIdAndDelete(id);
         // delete_user_tranasactions also

@@ -26,13 +26,25 @@ user_controller.setPin = async (req, res) => {
     }
     try {
         const setPin = await user_service.update_pin(req.USER_ID, pin);
-        console.log(setPin);
         res.status(200).json({ msg: 'Your Transaction Pin has been set succssfully' });
     } catch (error) {
         res.status(400).json({ msg: 'Error occured', error: error.message });
     }
 };
 
+user_controller.setPassword = async (req, res) => {
+    const { email, password } = req.body;
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
+    try {
+        const setPassword = await user_service.update_password(email, password);
+        res.status(200).json({ msg: 'Password set Successfully' });
+    } catch (error) {
+        res.status(400).json({ msg: 'Error occured', error: error.message });
+    }
+};
 user_controller.view_transactions = async (req, res) => {
     try {
         const user_transactions = await user_service.view_all_user_transactions(req.USER_ID);

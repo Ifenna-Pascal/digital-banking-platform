@@ -11,7 +11,6 @@ class admin_service {
             const user_data = {
                 first_name: data.first_name,
                 last_name: data.last_name,
-                password: randomly_generated_password(),
                 email: data.email,
                 role: data.role ? data.role : 'user',
                 account_details: {

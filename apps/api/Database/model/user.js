@@ -70,11 +70,4 @@ const userSchema = new Schema({
     },
 });
 
-userSchema.pre('save', async function (next) {
-    var user = this;
-    if (!user.isModified('password')) return next();
-    const hashed_password = await Hash(user.password);
-    user.password = hashed_password;
-    next();
-});
 module.exports = mongoose.model('user', userSchema);

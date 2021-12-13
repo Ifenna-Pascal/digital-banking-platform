@@ -15,6 +15,10 @@ class user_service {
     async user_login(data) {
         const { email } = data;
         const user = await user_repository_instance.find_user_by_email(email);
+        if (!user.password)
+            throw new Error(
+                'Your Password Has Not Been Created Yet, Kindly Create Your Password At >>> /user/update_password',
+            );
         if (!user) throw new Error('Invalid Email and Password');
         const isValidPassword = await bcrypt.compare(data.password, user.password);
         if (!isValidPassword) throw new Error('Password does not match');
@@ -27,6 +31,14 @@ class user_service {
             token: token,
         };
         return user_data;
+    }
+
+    async update_password(email, password) {
+        const user = await user_repository_instance.find_user_by_email(email);
+        if (!user) throw new Error('user does not exist in database');
+        const hashed_password = (await Hash(password)).toString();
+        const set_Password = await user_repository_instance.update_password(email, hashed_password);
+        return set_Password;
     }
 
     async view_all_user_transactions(id) {
