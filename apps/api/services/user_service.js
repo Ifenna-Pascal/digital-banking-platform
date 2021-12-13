@@ -51,6 +51,11 @@ class user_service {
         const user_transactions = await transaction_repository_instance.view_all_user_transactions(id);
         return user_transactions;
     }
+
+    async get_user_details(id) {
+        const user = await user_repository_instance.find_user_by_id(id);
+        return user;
+    }
 }
 
 module.exports = new user_service();

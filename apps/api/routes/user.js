@@ -1,6 +1,13 @@
 const router = require('express').Router();
 const { body, check } = require('express-validator');
-const { login, setPin, setPassword, view_transactions, update_profile } = require('../controller/user');
+const {
+    login,
+    setPin,
+    setPassword,
+    get_user_details,
+    view_transactions,
+    update_profile,
+} = require('../controller/user');
 const auth = require('../middlewares/auth');
 
 router.post(
@@ -15,6 +22,8 @@ router.post(
     check('password').not().isEmpty().withMessage('password is required'),
     login,
 );
+
+router.get('/user_details', auth(), get_user_details);
 
 router.put(
     '/update_password',

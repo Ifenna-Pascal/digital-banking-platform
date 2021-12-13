@@ -65,4 +65,13 @@ user_controller.view_transactions = async (req, res) => {
     }
 };
 
+user_controller.get_user_details = async (req, res) => {
+    try {
+        const user_details = await user_service.get_user_details(req.USER_ID);
+        res.status(200).json({ msg: 'user_details', user_profile_details: user_details });
+    } catch (error) {
+        res.status(400).json({ msg: 'Error occured', error: error.message });
+    }
+};
+
 module.exports = user_controller;
