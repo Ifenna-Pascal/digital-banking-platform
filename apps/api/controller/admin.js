@@ -1,67 +1,51 @@
-const {
-    create_user,
-    delete_user,
-    enable_user,
-    reverse_transaction,
-    disable_user,
-} = require('../services/admin_service');
-const { validationResult } = require('express-validator');
+const admin_service = require('../services/admin_service');
+const wrap = require('../utility/wrap');
+
 const admin_controller = {};
 
-admin_controller.create_user = async (req, res) => {
-    const data = req.body;
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
-    }
-    try {
-        const new_user = await create_user(data);
-        res.status(200).json({ msg: 'new user is created', data: new_user });
-    } catch (error) {
-        console.log(error);
-        res.status(400).send({ message: "user wasn't created", error: error.message });
-    }
-};
+admin_controller.create_user = wrap(async (req, res) => {
+    const { user, setup_token, setup_token_expires } = await admin_service.create_user(req.body);
+    res.status(201).json({
+        msg: 'new user is created. Give them the setup code so they can choose a password.',
+        data: user,
+        setup_token,
+        setup_token_expires,
+    });
+});
 
-admin_controller.delete_user = async (req, res) => {
-    const id = req.params.id;
-    try {
-        const deleted_user = await delete_user(id);
-        res.status(200).json({ msg: 'user is deleted', data: deleted_user });
-    } catch (error) {
-        res.status(400).send({ message: "user wasn't delted", error: error.message });
-    }
-};
+admin_controller.resend_setup = wrap(async (req, res) => {
+    const setup = await admin_service.resend_setup(req.params.id);
+    res.status(200).json({ msg: 'new setup code issued', ...setup });
+});
 
-admin_controller.enable_user = async (req, res) => {
-    const { id } = req.params;
-    try {
-        const enabled_user = await enable_user(id);
-        res.status(200).json({ msg: 'user account isenabled', data: enabled_user });
-    } catch (error) {
-        res.status(400).send({ message: "user wasn't enabled", error: error.message });
-    }
-};
+admin_controller.list_users = wrap(async (req, res) => {
+    const { items, pagination } = await admin_service.list_users(req.query.page || 1, req.query.limit || 20);
+    res.status(200).json({ msg: 'users', users: items, pagination });
+});
 
-admin_controller.disable_user = async (req, res) => {
-    const { id } = req.params;
-    try {
-        const disabled_user = await disable_user(id);
-        res.status(200).json({ msg: 'user account is disabled', data: disabled_user });
-    } catch (error) {
-        res.status(400).send({ message: "user wasn't disabled", error: error.message });
-    }
-};
+admin_controller.list_transactions = wrap(async (req, res) => {
+    const { items, pagination } = await admin_service.list_transactions(req.query.page || 1, req.query.limit || 20);
+    res.status(200).json({ msg: 'transactions', transactions: items, pagination });
+});
 
-admin_controller.reversed_transaction = async (req, res) => {
-    const { id } = req.params;
-    // id is the randomly generated transaction_id for every transaction
-    try {
-        const transaction_reverse = await reverse_transaction(id);
-        res.status(200).json({ msg: 'transaction reversed', data: transaction_reverse });
-    } catch (error) {
-        res.status(400).send({ message: "transaction wasn't reversed", error: error.message });
-    }
-};
+admin_controller.delete_user = wrap(async (req, res) => {
+    const deleted = await admin_service.delete_user(req.params.id, req.USER_ID);
+    res.status(200).json({ msg: 'user is deleted', data: deleted });
+});
+
+admin_controller.enable_user = wrap(async (req, res) => {
+    const user = await admin_service.set_active(req.params.id, true, req.USER_ID);
+    res.status(200).json({ msg: 'user account is enabled', data: user });
+});
+
+admin_controller.disable_user = wrap(async (req, res) => {
+    const user = await admin_service.set_active(req.params.id, false, req.USER_ID);
+    res.status(200).json({ msg: 'user account is disabled', data: user });
+});
+
+admin_controller.reversed_transaction = wrap(async (req, res) => {
+    const result = await admin_service.reverse_transaction(req.params.id);
+    res.status(200).json({ msg: 'transaction reversed', data: result });
+});
 
 module.exports = admin_controller;

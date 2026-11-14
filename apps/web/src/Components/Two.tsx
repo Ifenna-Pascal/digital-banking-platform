@@ -1,43 +1,52 @@
 import React from "react";
+import { Link } from "react-router-dom";
+
 interface IProps {
   img?: string;
   text_p?: string;
   text_h1?: string;
   reverse?: boolean;
+  btn_text?: string;
+  btn_to?: string;
 }
 
-const Twos: React.FC<IProps> = ({ img, text_p, text_h1, reverse }) => {
+// Hero: big headline, short pitch and one call to action, beside an illustration.
+const Twos: React.FC<IProps> = ({
+  img,
+  text_p,
+  text_h1,
+  reverse,
+  btn_text = "Get started",
+  btn_to = "/register",
+}) => {
   return (
-    <div className="h-screen sm:h-full md:py-32 md:px-12 flex md:mb-8 flex-col items-center">
+    <div className="md:py-24 md:px-12 py-10 flex md:mb-8 flex-col items-center">
       <div
-        className={`container flex flex-col xs:mt-4 sm:mt-8 mt-6 ${
+        className={`container flex flex-col ${
           reverse ? "lg:flex-row-reverse" : "lg:flex-row"
-        } items-center justify-center gap-x-24`}
+        } items-center justify-center gap-x-24 gap-y-8`}
       >
-        {/* <!-- Image --> */}
-        <div className="flex md:basis-1/2 justify-center lg:mb-0">
-          <img
-            className="w-full h-5/6 sm:w-3/4 sm:h-3/4 md:w-full sm:mb-0 md:h-full"
-            src={img}
-            alt=""
-          />
+        <div className="flex md:basis-1/2 justify-center">
+          <img className="w-full sm:w-3/4 md:w-full" src={img} alt="" />
         </div>
-        {/* <!-- Content --> */}
-        <div className="flex py-1 px-3 flex-1 flex-col sm:gap-5 gap-3 items-center lg:items-start">
-          <h1 className="sm:text-5xl xs:text-2xl text-4xl leading-10 text-center sm:text-left font-Poppins font-bold text-indigo-500">
+        <div className="flex px-3 flex-1 flex-col sm:gap-5 gap-3 items-center lg:items-start">
+          <h1 className="sm:text-5xl text-4xl leading-tight text-center lg:text-left font-Poppins font-bold text-indigo-500">
             {text_h1}
           </h1>
-          <p className="text-gray-500 font-Poppins text-lg xs:text-md sm:text-lg my-2 sm:my-4 text-center lg:text-left sm:w-3/4 lg:w-3/4">
+          <p className="text-gray-500 font-Poppins text-lg my-2 sm:my-4 text-center lg:text-left lg:w-3/4">
             {text_p}
           </p>
-          <button className="text-sm flex-1 text-center sm:mt-0 mt-4">
-            Register{" "}
-            <i className="text-sm text-center ml-1 text-white fas fa-angle-right"></i>
-          </button>
+          <Link to={btn_to}>
+            <button type="button" className="text-sm">
+              {btn_text}{" "}
+              <i
+                className="text-sm ml-1 text-white fas fa-angle-right"
+                aria-hidden="true"
+              ></i>
+            </button>
+          </Link>
         </div>
       </div>
-      {/* <!-- Rounded Rectangle --> */}
-      {/* <div className={`${reverse ? "reverse" : "no_reverse"}`}></div> */}
     </div>
   );
 };

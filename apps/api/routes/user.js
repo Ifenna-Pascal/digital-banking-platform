@@ -1,62 +1,66 @@
 const router = require('express').Router();
-const { body, check } = require('express-validator');
-const {
-    login,
-    setPin,
-    setPassword,
-    get_user_details,
-    view_transactions,
-    update_profile,
-} = require('../controller/user');
+const { query } = require('express-validator');
+const c = require('../controller/user');
 const auth = require('../middlewares/auth');
+const { auth_limiter } = require('../middlewares/rate_limits');
+const v = require('../middlewares/validate');
 
 router.post(
     '/signin',
-    body('email')
-        .not()
-        .isEmpty()
-        .withMessage('email feild is required')
-        .isEmail()
-        .withMessage('Email format should be propeerly inputed eg:>> johndoe@gmail.com')
-        .normalizeEmail(),
-    check('password').not().isEmpty().withMessage('password is required'),
-    login,
+    auth_limiter,
+    v.email(),
+    v.body('password').notEmpty().withMessage('password is required'),
+    v.validate,
+    c.login,
 );
 
-router.get('/user_details', auth(), get_user_details);
+// first password, with the one-time setup code an admin issued
+router.post(
+    '/setup_password',
+    auth_limiter,
+    v.email(),
+    v.body('setup_token').isString().trim().notEmpty().withMessage('setup_token is required'),
+    v.password(),
+    v.validate,
+    c.setup_password,
+);
 
 router.put(
-    '/update_password',
-    body('email')
-        .not()
-        .isEmpty()
-        .withMessage('email feild is required')
-        .isEmail()
-        .withMessage('Email format should be propeerly inputed eg:>> johndoe@gmail.com')
-        .normalizeEmail(),
-    check('password')
-        .not()
-        .isEmpty()
-        .withMessage('password is required')
-        .isLength({ min: 6, max: 6 })
-        .withMessage('Password should be 6 characters'),
-    setPassword,
-);
-
-router.put('update_profile', auth(), update_profile);
-
-router.post(
-    '/setpin',
-    body('pin')
-        .not()
-        .isEmpty()
-        .withMessage('transaction pin is required')
-        .isLength({ min: 4, max: 4 })
-        .withMessage('pin should be 4 letter'),
+    '/change_password',
+    auth_limiter,
     auth(),
-    setPin,
+    v.body('current_password').notEmpty().withMessage('current_password is required'),
+    v.password('new_password'),
+    v.validate,
+    c.change_password,
 );
 
-router.get('/transactions', auth(), view_transactions);
+router.get('/user_details', auth(), c.get_user_details);
+
+router.put(
+    '/update_profile',
+    auth(),
+    v.name('first_name').optional(),
+    v.name('last_name').optional(),
+    v.email().optional(),
+    v.validate,
+    c.update_profile,
+);
+
+router.post('/setpin', auth_limiter, auth(), v.pin(), v.validate, c.setPin);
+
+router.get(
+    '/transactions',
+    auth(),
+    ...v.pagination,
+    query('type')
+        .optional()
+        .isIn(['transfer', 'deposit', 'withdrawal', 'reversal'])
+        .withMessage('type must be transfer, deposit, withdrawal or reversal'),
+    v.validate,
+    c.view_transactions,
+);
+
+router.get('/summary', auth(), c.summary);
 
 module.exports = router;

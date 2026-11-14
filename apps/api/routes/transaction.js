@@ -1,32 +1,50 @@
 const router = require('express').Router();
-const { body, check } = require('express-validator');
-const { deposit, withdrawal, transfer } = require('../controller/transaction');
+const { param } = require('express-validator');
+const c = require('../controller/transaction');
 const auth = require('../middlewares/auth');
 const transaction = require('../middlewares/transaction');
+const { transaction_limiter } = require('../middlewares/rate_limits');
+const v = require('../middlewares/validate');
 
+// validation runs before the PIN check, so bad input never costs a PIN attempt
 router.post(
     '/deposit',
-    check('amount').not().isEmpty().withMessage('Amount is required'),
+    transaction_limiter,
     auth(),
+    v.amount(),
+    v.pin(),
+    v.narration(false),
+    v.validate,
     transaction(),
-    deposit,
+    c.deposit,
 );
 
 router.post(
     '/withdrawal',
-    check('amount').not().isEmpty().withMessage('Amount is required'),
+    transaction_limiter,
     auth(),
+    v.amount(),
+    v.pin(),
+    v.narration(false),
+    v.validate,
     transaction(),
-    withdrawal,
+    c.withdrawal,
 );
 
 router.post(
     '/transfer',
-    check('amount').not().isEmpty().withMessage('Amount is required'),
-    check('account_number').not().isEmpty().withMessage('Account Number is required'),
-    check('narration').not().isEmpty().withMessage('Narration is required'),
+    transaction_limiter,
     auth(),
+    v.amount(),
+    v.pin(),
+    v.account_number(),
+    v.narration(true),
+    v.validate,
     transaction(),
-    transfer,
+    c.transfer,
 );
+
+// name check before sending money: "you are sending to Jane Doe"
+router.get('/lookup/:account_number', auth(), v.account_number(param), v.validate, c.lookup);
+
 module.exports = router;

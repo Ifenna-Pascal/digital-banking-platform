@@ -1,41 +1,24 @@
-import React, { useState } from "react";
-import { IProps } from "./sideUtil";
+import React from "react";
+import { NavLink } from "react-router-dom";
+import { NavItem } from "./sideUtil";
 
-function EachNav({ logo, name, drop, sub }: IProps) {
-  const [open, setOpen] = useState(false);
-  const toggle = () => {
-    setOpen(!open);
-  };
+function EachNav({
+  name,
+  icon,
+  to,
+  onNavigate,
+}: NavItem & { onNavigate?: () => void }) {
   return (
-    <>
-      <div className="flex justify-start items-start hover:bg-indigo-700 hover:cursor-pointer hover:rounded-md w-full px-1 py-2 mb-2">
-        <div className="flex-1 flex gap-4 py-2 px-2">
-          <span className="text-lg tex-white font-medium">{logo}</span>
-          <span className="text-lg tracking-wide font-PT text-white font-semibold">
-            {" "}
-            {name}{" "}
-          </span>
-        </div>
-        {drop && (
-          <i
-            onClick={() => toggle()}
-            className="text-sm text-white  py-2 px-2 justify-end items-center text-center fa fa-angle-down"
-            aria-hidden="true"
-          ></i>
-        )}
-      </div>
-      {open &&
-        sub &&
-        sub.length > 0 &&
-        sub.map((link, index) => (
-          <span
-            className="text-left block text-white mb-2 flex items-start text-md font-Poppins justify-start mx-auto hover:cursor-pointer rounded-md  hover:bg-indigo-700 w-100 px-3 py-2"
-            key={index}
-          >
-            {link}
-          </span>
-        ))}
-    </>
+    <NavLink
+      exact={to === "/dashboard"}
+      to={to}
+      onClick={onNavigate}
+      className="flex items-center gap-4 w-full px-3 py-3 mb-2 rounded-md text-white hover:bg-indigo-700"
+      activeClassName="bg-indigo-700"
+    >
+      <i className={`fas ${icon} w-5 text-center`} aria-hidden="true"></i>
+      <span className="text-lg tracking-wide font-semibold">{name}</span>
+    </NavLink>
   );
 }
 

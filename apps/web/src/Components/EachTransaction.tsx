@@ -1,38 +1,49 @@
 import React from "react";
-import { RiArrowUpSLine, RiArrowDownSLine } from "react-icons/ri";
-import { TProps } from "./sideUtil";
+import { RiArrowDownSLine, RiArrowUpSLine } from "react-icons/ri";
+import { Transaction } from "../types";
+import { dayAndMonth, describe, formatMoney } from "../Util/format";
 
-function EachTransaction({ type, day, month, amount, details }: TProps) {
+function EachTransaction({ transaction: t }: { transaction: Transaction }) {
+  const debit = t.direction === "debit";
+  const { day, month } = dayAndMonth(t.created_at);
   return (
-    <div className="flex flex-1 py-4">
+    <li className="flex items-center py-3 border-b border-gray-100 last:border-0 list-none m-0 px-0 hover:text-inherit cursor-default">
       <div
-        className={`flex w-12 justify-center h-12 justify-center items-center text-center rounded-full ${
-          type === "debit" ? "border-red-400" : "border-green-500"
-        } border mr-4`}
+        className={`flex w-10 h-10 shrink-0 justify-center items-center rounded-full border ${
+          debit ? "border-red-400" : "border-green-500"
+        } mr-4`}
+        aria-hidden="true"
       >
-        {type === "debit" ? (
-          <RiArrowUpSLine className="text-red-400 text-lg " />
+        {debit ? (
+          <RiArrowUpSLine className="text-red-400 text-lg" />
         ) : (
           <RiArrowDownSLine className="text-green-500 text-lg" />
         )}
       </div>
-      <div className="px-2 text-center mr-12">
-        <h1 className="text-2xl text-gray-500 font-Poppins font-semibold mb-3 block">
+      <div className="text-center mr-4 w-10 shrink-0">
+        <div className="text-lg text-gray-500 font-semibold leading-tight">
           {day}
-        </h1>
-        <p className="font-Poppins text-gray-400 text-lg">{month}</p>
+        </div>
+        <div className="text-sm text-gray-400">{month}</div>
       </div>
-      <div className="mr-7">
-        <h1
-          className={`text-xl ${
-            type === "debit" ? "text-red-400" : "text-green-500"
-          } font-Poppins font-semibold mb-3 block`}
-        >
-          {`${type === "debit" ? "-" : "+"}` + amount}
-        </h1>
-        <p className="font-Poppins text-gray-400 text-lg">{details}</p>
+      <div className="flex-1 min-w-0">
+        <div className="text-gray-700 truncate">{describe(t)}</div>
+        <div className="text-sm text-gray-400 truncate">
+          {t.transaction_narration || t.transaction_id}
+          {t.is_reversed && (
+            <span className="ml-2 text-amber-600">(reversed)</span>
+          )}
+        </div>
       </div>
-    </div>
+      <div
+        className={`ml-3 font-semibold whitespace-nowrap ${
+          debit ? "text-red-400" : "text-green-600"
+        }`}
+      >
+        {debit ? "−" : "+"}
+        {formatMoney(t.amount_transacted)}
+      </div>
+    </li>
   );
 }
 

@@ -6,11 +6,19 @@
 
 
 @layer base {
+    html {
+        color-scheme: light;
+    }
+
+    body {
+        @apply bg-white text-gray-800;
+    }
+
     li {
         @apply font-Poppins text-slate-700 mr-3 hover:text-indigo-500 px-3 py-2 text-lg tracking-wide cursor-pointer
     }
 
-    button {
+    button, [type='button'], [type='submit'], [type='reset'] {
         @apply font-Poppins text-white bg-indigo-500 hover:bg-indigo-800 border-none rounded-md text-sm px-10 py-3 cursor-pointer
     }
 }

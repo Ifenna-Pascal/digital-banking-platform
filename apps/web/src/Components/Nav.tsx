@@ -1,27 +1,79 @@
-import React from "react";
-import Images from "../Util/images";
-// import { Link as li } from "react-router-dom";
-import img1 from "../Util/logo-bookmark-white.png";
+import React, { useState } from "react";
+import { Link } from "react-router-dom";
+import { useAuth } from "../auth/AuthContext";
 
 const Nav: React.FC = () => {
+  const { profile } = useAuth();
+  const [open, setOpen] = useState(false);
+
+  const links = (
+    <>
+      <li>
+        <a href="#features">Features</a>
+      </li>
+      <li>
+        <a href="#how-it-works">How it works</a>
+      </li>
+      <li>
+        <a href="#contact">Contact</a>
+      </li>
+    </>
+  );
+  const actions = profile ? (
+    <Link to="/dashboard">
+      <button type="button">Dashboard</button>
+    </Link>
+  ) : (
+    <>
+      <li>
+        <Link to="/login">Log in</Link>
+      </li>
+      <Link to="/register">
+        <button type="button">Finish setup</button>
+      </Link>
+    </>
+  );
+
   return (
-    <nav className="flex justify-between md:justify-around w-full gap-x-5  px-10 xss:py-2 py-5 items-center">
-      <div className="py-1 bg-red-200 sm:px-4 justify-self-start flex-initial sm:ml-8 flex-shrink-0 cursor-pointer">
-        <img className="bg-cover" src={img1} />
+    <nav className="w-full px-6 sm:px-10 py-5">
+      <div className="flex justify-between md:justify-around items-center gap-x-5">
+        <Link
+          to="/"
+          className="py-1 px-3 bg-indigo-500 rounded flex-shrink-0"
+          aria-label="Online Banking home"
+        >
+          <span className="text-white font-Poppins font-semibold text-lg whitespace-nowrap">
+            <i className="fas fa-university mr-2" aria-hidden="true"></i>Online
+            Banking
+          </span>
+        </Link>
+        <ul className="hidden md:flex flex-1 justify-center items-center">
+          {links}
+        </ul>
+        <ul className="hidden md:flex items-center">{actions}</ul>
+        <span
+          role="button"
+          tabIndex={0}
+          aria-label={open ? "Close menu" : "Open menu"}
+          onClick={() => setOpen(!open)}
+          onKeyDown={(e) => e.key === "Enter" && setOpen(!open)}
+          className="md:hidden text-3xl text-gray-700 cursor-pointer"
+        >
+          <i
+            className={`fas ${open ? "fa-times" : "fa-bars"}`}
+            aria-hidden="true"
+          ></i>
+        </span>
       </div>
-      <ul className="mdd:hidden flex-1 justify-self-center justify-center items-center self-center w-100% mdd:basis-3/4 md:flex">
-        <li> Featues </li>
-        <li> About Us </li>
-        <li> Our services </li>
-        <li> Contact </li>
-      </ul>
-      <ul className="hidden md:flex">
-        <li> Login </li>
-        <button>Register</button>
-      </ul>
-      <div className="flex md:hidden flex-1 justify-end flex-shrink-0">
-        <i className="text-3xl text-gray-700 fas fa-bars"></i>
-      </div>
+      {open && (
+        <ul
+          className="md:hidden flex flex-col items-start gap-2 mt-4"
+          onClick={() => setOpen(false)}
+        >
+          {links}
+          {actions}
+        </ul>
+      )}
     </nav>
   );
 };

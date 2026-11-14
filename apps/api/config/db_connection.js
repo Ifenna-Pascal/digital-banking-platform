@@ -1,14 +1,10 @@
 const mongoose = require('mongoose');
 
 module.exports = {
-    Db_connection: () => {
-        mongoose
-            .connect(process.env.MONGO_URL, { useNewUrlParser: true, useUnifiedTopology: true })
-            .then(() => {
-                console.log('db coonected successfully');
-            })
-            .catch((err) => {
-                console.log('mongoose connection error', err);
-            });
+    Db_connection: async (url = process.env.MONGO_URL) => {
+        await mongoose.connect(url);
+        // build the unique indexes (email, account number, transaction id)
+        await mongoose.connection.syncIndexes();
+        console.log('db connected successfully');
     },
 };
