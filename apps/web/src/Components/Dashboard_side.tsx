@@ -1,37 +1,56 @@
 import React, { useState } from "react";
-import { Util } from "./sideUtil";
+import { useAuth } from "../auth/AuthContext";
 import EachNav from "./EachNav";
+import { NAV_ITEMS } from "./sideUtil";
+
 function SideNav() {
+  const { profile, logout } = useAuth();
   const [show, setShow] = useState(false);
-  const toggle = (): void => {
-    setShow(!show);
-  };
+  const items = NAV_ITEMS.filter(
+    (item) => !item.adminOnly || profile?.role === "admin"
+  );
+
   return (
     <>
-      <div
+      {/* mobile top bar */}
+      <div className="md:hidden flex items-center justify-between bg-indigo-500 px-4 py-3">
+        <span className="text-white font-Poppins font-semibold">
+          Online Banking
+        </span>
+        <span
+          role="button"
+          tabIndex={0}
+          aria-label={show ? "Close menu" : "Open menu"}
+          onClick={() => setShow(!show)}
+          onKeyDown={(e) => e.key === "Enter" && setShow(!show)}
+          className="text-white text-2xl cursor-pointer"
+        >
+          <i
+            className={`fas ${show ? "fa-times" : "fa-bars"}`}
+            aria-hidden="true"
+          ></i>
+        </span>
+      </div>
+      <nav
+        aria-label="Dashboard"
         className={`${
           show ? "flex" : "hidden"
-        } bg-indigo-500 shadow-2xl h-screen transition duration-300 delay-150 shadow-md px-5 py-6 w-60 md:flex flex-col items-start text-left justify-start`}
+        } md:flex flex-col bg-indigo-500 shadow-2xl md:min-h-screen px-5 py-6 md:w-60 w-full shrink-0`}
       >
-        <div className="mt-16">
-          {Util.map((util, index) => (
-            <EachNav
-              key={index}
-              name={util.name}
-              logo={util.logo}
-              drop={util.drop}
-              sub={util.sub}
-            />
-          ))}
+        <div className="hidden md:block text-white font-Poppins text-xl font-semibold mb-10 px-3">
+          Online Banking
         </div>
-      </div>
-      <div className="flex-start md:hidden" onClick={toggle}>
-        {show ? (
-          <i className="text-3xl text-indigo-400 fas fa-times"></i>
-        ) : (
-          <i className="text-3xl text-indigo-400 fas fa-bars"></i>
-        )}
-      </div>
+        {items.map((item) => (
+          <EachNav key={item.to} {...item} onNavigate={() => setShow(false)} />
+        ))}
+        <button
+          type="button"
+          onClick={logout}
+          className="mt-6 bg-transparent hover:bg-indigo-700 text-lg px-3 py-3 text-left font-semibold"
+        >
+          <i className="fas fa-sign-out-alt mr-4" aria-hidden="true"></i>Log out
+        </button>
+      </nav>
     </>
   );
 }

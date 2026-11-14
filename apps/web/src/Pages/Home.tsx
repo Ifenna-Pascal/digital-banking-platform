@@ -14,23 +14,26 @@ function Home() {
       <Nav />
       <Twos
         img={img1}
-        text_h1="Seamless Transactions For Any Business Worldwie"
+        text_h1="Banking that keeps up with you"
         reverse={true}
-        text_p="It was popularised in the 1960s and more recently with desktop publishing software like Aldus PageMaker Ipsum."
+        text_p="Check your balance, send money to any account number and track every transaction, all from one dashboard."
+        btn_text="Finish account setup"
       />
       <Features />
       <Side_by_side
+        id="how-it-works"
         img={img3}
-        btn_text="Create Account"
-        text_h1="Banking for you and others"
-        text_p="It was popularised in the 1960s and more recently with desktop publishing software like Aldus PageMaker Ipsu"
+        btn_text="Finish setup"
+        text_h1="Opened by the bank, set up by you"
+        text_p="We open your account and give you a one-time setup code. Use it to choose your password, then set a 4-digit PIN that protects every transaction."
       />
       <Side_by_side
         img={img2}
         reverse={true}
-        btn_text="Download Now"
-        text_h1="Download our Android app on Playstore"
-        text_p="It was popularised in the 1960s and more recently with desktop publishing software like Aldus PageMaker Ipsu"
+        btn_text="Log in"
+        btn_to="/login"
+        text_h1="Works on any device"
+        text_p="The dashboard works in any modern browser, on your phone, tablet or computer. Nothing to install."
       />
       <Parralax />
     </>

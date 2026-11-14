@@ -7,7 +7,7 @@ interface IFeature {
   body: string;
 }
 
-const OneFature: React.FC<IFeature> = ({ className, logo, title, body }) => {
+const OneFeature: React.FC<IFeature> = ({ className, logo, title, body }) => {
   return (
     <div
       className={overrideTailwindClasses(
@@ -37,17 +37,16 @@ const OneFature: React.FC<IFeature> = ({ className, logo, title, body }) => {
 
 function Features() {
   return (
-    <div className="container mx-auto sm:mb-32 mb-12">
+    <section id="features" className="container mx-auto sm:mb-32 mb-12">
       <h1 className="text-center text-4xl mb-4 font-Poppins text-indigo-500  font-bold">
         Features
       </h1>{" "}
       <hr className="w-32 mx-auto text-gray-500" />
       <p className="px-8 text-center py-4 text-md text-gray-500 font-Poppins">
-        Powerful metrics to btter understand ur business are right on your
-        fingertips once you start working with them
+        Everything you need to manage your money, in one place
       </p>
       <div className="flex flex-col mt-10 sm:flex-row xs:gap-12 gap-12">
-        <OneFature
+        <OneFeature
           logo={
             <i
               className="text-white text-3xl fa fa-user"
@@ -56,9 +55,9 @@ function Features() {
           }
           className="bg-indigo-500"
           title="User Dashboard"
-          body="Powerful metrics to understand your business, users profile exists"
+          body="See your balance, spending and recent activity at a glance"
         />
-        <OneFature
+        <OneFeature
           logo={
             <i
               className="text-white text-3xl fa fa-credit-card text-center"
@@ -67,9 +66,9 @@ function Features() {
           }
           className="bg-red-500"
           title="Bank Accounts"
-          body="Create bank account with unique account numbers and store finance"
+          body="Every customer gets a unique 10-digit account number"
         />
-        <OneFature
+        <OneFeature
           logo={
             <i
               className="text-white text-center text-3xl fa fa-paper-plane"
@@ -78,10 +77,10 @@ function Features() {
           }
           className="bg-blue-500"
           title="Bank Transactions"
-          body="Perform seamless credit, debit and transfer transactions"
+          body="Deposit, withdraw and transfer, each protected by your PIN"
         />
       </div>
-    </div>
+    </section>
   );
 }
 

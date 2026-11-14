@@ -1,117 +1,125 @@
+const bcrypt = require('bcrypt');
 const user_repository_instance = require('../Database/Repository/userRepo');
 const transaction_repository_instance = require('../Database/Repository/transactionRepo');
-const bcrypt = require('bcrypt');
 const { randomly_generated_transaction_id } = require('../utility/randomly_generated_string');
+const { AppError } = require('../utility/errors');
+const { to_money } = require('../utility/money');
+const { send_mail } = require('../utility/mailer');
+
+const entry = (user, type, direction, amount, narration, extra = {}) => {
+    const current = user.account_details.account_balance;
+    return {
+        user_id: user._id,
+        transaction_id: randomly_generated_transaction_id(),
+        transaction_type: type,
+        direction,
+        transaction_status: 'success',
+        amount_transacted: amount,
+        // `user` is the document returned *after* the atomic update
+        previous_balance: to_money(direction === 'credit' ? current - amount : current + amount),
+        current_balance: current,
+        transaction_narration: narration,
+        ...extra,
+    };
+};
+
+const alert = (user, entryDoc) =>
+    send_mail({
+        to: user.email,
+        subject: `${entryDoc.direction === 'credit' ? 'Credit' : 'Debit'} alert: ${entryDoc.amount_transacted}`,
+        text:
+            `Hello ${user.first_name},\n\n` +
+            `A ${entryDoc.transaction_type} of ${entryDoc.amount_transacted} was ${entryDoc.direction}ed ` +
+            `${entryDoc.direction === 'credit' ? 'to' : 'from'} your account ${user.account_details.account_number}.\n` +
+            `Reference: ${entryDoc.transaction_id}\nNew balance: ${entryDoc.current_balance}\n`,
+    });
 
 class transaction_service {
     async check_user_isActive(id) {
         const user = await user_repository_instance.find_user_by_id(id);
-        return user.isActive;
+        return Boolean(user && user.isActive);
     }
 
     async check_user_transactionPin_iscreated(id) {
-        const user = await user_repository_instance.find_user_by_id(id);
-        return user.transaction_pin;
+        const user = await user_repository_instance.find_user_by_id(id, '+transaction_pin');
+        return Boolean(user && user.transaction_pin);
     }
 
     async check_if_userPin_equals_insertedPin(transaction_pin, id) {
-        const user = await user_repository_instance.find_user_by_id(id);
-        const user_pin = user.transaction_pin;
-        console.log(user);
-        console.log(user_pin, 'pin');
-        const isValid_pin = await bcrypt.compare(transaction_pin, user_pin);
-        return isValid_pin;
+        const user = await user_repository_instance.find_user_by_id(id, '+transaction_pin');
+        if (!user || !user.transaction_pin) return false;
+        return bcrypt.compare(String(transaction_pin), user.transaction_pin);
     }
 
-    async deposit_transaction(data, id) {
-        const user = await user_repository_instance.find_user_by_id(id);
-        if (!user) throw new Error('user does not exist');
-        const transaction_data = {
-            user_id: id,
-            transaction_id: randomly_generated_transaction_id(),
-            transaction_type: 'deposit',
-            amount_transacted: parseInt(data.amount),
-            transaction_status: 'success',
-            previous_balance: user.account_details.account_balance,
-            current_balance: user.account_details.account_balance + data.amount,
-            transaction_narration: data.narration,
-        };
-        const new_transaction = await transaction_repository_instance.create_transaction(transaction_data);
-        if (!new_transaction) throw new Error('Transaction not created');
-        const new_amount = user.account_details.account_balance + data.amount;
-        const updated_user_balance = await user_repository_instance.update_user_amount(id, new_amount);
-        if (!updated_user_balance) throw new Error('cannot update ballance');
+    async deposit_transaction({ amount, narration }, id) {
+        amount = to_money(amount);
+        const user = await user_repository_instance.credit(id, amount);
+        if (!user) throw new AppError('Account not found or disabled', 400);
+        const [transaction] = await transaction_repository_instance.create_transactions([
+            entry(user, 'deposit', 'credit', amount, narration || 'Deposit', {
+                reference: randomly_generated_transaction_id(),
+            }),
+        ]);
+        alert(user, transaction);
+        return { transaction, account_balance: user.account_details.account_balance };
+    }
+
+    async withdrawal_transaction({ amount, narration }, id) {
+        amount = to_money(amount);
+        const user = await user_repository_instance.debit(id, amount);
+        if (!user) throw new AppError('You do not have enough balance for this withdrawal', 400);
+        const [transaction] = await transaction_repository_instance.create_transactions([
+            entry(user, 'withdrawal', 'debit', amount, narration || 'Withdrawal', {
+                reference: randomly_generated_transaction_id(),
+            }),
+        ]);
+        alert(user, transaction);
+        return { transaction, account_balance: user.account_details.account_balance };
+    }
+
+    async transfer_transaction({ amount, account_number, narration }, id) {
+        amount = to_money(amount);
+        const beneficiary = await user_repository_instance.find_by_account_number(account_number);
+        if (!beneficiary) throw new AppError('The beneficiary account number does not exist', 404);
+        if (beneficiary._id.equals(id)) throw new AppError('You cannot transfer to your own account', 400);
+        if (!beneficiary.isActive) throw new AppError('The beneficiary account cannot receive transfers', 400);
+
+        // 1. take the money from the sender (fails cleanly if not enough)
+        const sender = await user_repository_instance.debit(id, amount);
+        if (!sender) throw new AppError('You do not have enough balance for this transfer', 400);
+
+        // 2. give it to the recipient; if that fails, put it back
+        const recipient = await user_repository_instance.credit(beneficiary._id, amount);
+        if (!recipient) {
+            await user_repository_instance.force_adjust(id, amount);
+            throw new AppError('The beneficiary account cannot receive transfers', 400);
+        }
+
+        // 3. record both sides under one reference
+        const reference = randomly_generated_transaction_id();
+        const parties = { reference, from: sender._id, to: recipient._id };
+        const [debit, credit] = await transaction_repository_instance.create_transactions([
+            entry(sender, 'transfer', 'debit', amount, narration, parties),
+            entry(recipient, 'transfer', 'credit', amount, narration, parties),
+        ]);
+        alert(sender, debit);
+        alert(recipient, credit);
+
         return {
-            msg: 'Deposit transaction completed successfully',
-            new_transaction,
-            updated_user_balance,
+            transaction: debit,
+            account_balance: sender.account_details.account_balance,
+            beneficiary: {
+                name: `${recipient.first_name} ${recipient.last_name}`,
+                account_number: recipient.account_details.account_number,
+            },
         };
     }
 
-    // @description :>> withdrawal service
-    async withdrawal_transaction(data, id) {
-        const user = await user_repository_instance.find_user_by_id(id);
-        if (!user) throw new Error('user does not exist');
-        if (user.account_details.account_balance < parseInt(data.amount))
-            throw new Error('you do not have enough balance for your withdrwal');
-        const transaction_data = {
-            user_id: id,
-            transaction_id: randomly_generated_transaction_id(),
-            transaction_type: 'withdrawal',
-            amount_transacted: parseInt(data.amount),
-            transaction_status: 'success',
-            previous_balance: user.account_details.account_balance,
-            current_balance: user.account_details.account_balance - data.amount,
-            transaction_narration: data.narration,
-        };
-        const new_transaction = await transaction_repository_instance.create_transaction(transaction_data);
-        if (!new_transaction) throw new Error('Transaction not created');
-        const new_amount = user.account_details.account_balance - data.amount;
-        const updated_user_balance = await user_repository_instance.update_user_amount(id, new_amount);
-        if (!updated_user_balance) throw new Error('cannot update ballance');
-        return {
-            msg: 'Withdrawal transaction completed successfully',
-            new_transaction,
-            updated_user_balance,
-        };
-    }
-
-    async increment_beneficiary_account(account_number, amount) {
-        const beneficiary = await user_repository_instance.find_beneficiary(account_number);
-        const new_balance = beneficiary.account_details.account_balance + amount;
-        const update_beneficiary_amount = await user_repository_instance.update_user_amount(
-            beneficiary._id,
-            new_balance,
-        );
-        return update_beneficiary_amount;
-    }
-
-    async depositor_transaction(id, amount, account_number, narration) {
-        const depositor_details = await user_repository_instance.find_user_by_id(id);
-        const beneficiary = await user_repository_instance.find_beneficiary(account_number);
-        console.log(beneficiary, 'depopfd');
-        if (!beneficiary) throw Error('The Beneficiary Account Number Does Not Exist');
-        if (beneficiary._id === id) throw Error('You cannot transfer money to your account rather deposit');
-        if (depositor_details.account_details.account_balance < parseInt(amount))
-            throw new Error('you do not have enough balance for your transfer');
-        const transaction_data = {
-            user_id: id,
-            transaction_id: randomly_generated_transaction_id(),
-            transaction_type: 'transfer',
-            amount_transacted: parseInt(amount),
-            transaction_status: 'success',
-            previous_balance: depositor_details.account_details.account_balance,
-            current_balance: depositor_details.account_details.account_balance - amount,
-            transaction_narration: narration,
-            from: id,
-            to: beneficiary._id,
-        };
-        const new_transaction = await transaction_repository_instance.create_transaction(transaction_data);
-        console.log(new_transaction, 'newwww');
-        if (!new_transaction) throw new Error('Transaction not created');
-        const new_balance = depositor_details.account_details.account_balance - amount;
-        const update_depositor_amount = await user_repository_instance.update_user_amount(id, new_balance);
-        return new_transaction;
+    // Lets the sender confirm who they're paying before sending money.
+    async lookup_account(account_number) {
+        const user = await user_repository_instance.find_by_account_number(account_number);
+        if (!user || !user.isActive) throw new AppError('Account not found', 404);
+        return { name: `${user.first_name} ${user.last_name}`, account_number: user.account_details.account_number };
     }
 }
 

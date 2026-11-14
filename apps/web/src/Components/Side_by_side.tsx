@@ -1,51 +1,59 @@
 import React from "react";
+import { Link } from "react-router-dom";
+
 interface IProps {
+  id?: string;
   img?: string;
   text_p?: string;
   text_h1?: string;
   reverse?: boolean;
   btn_text?: string;
+  btn_to?: string;
 }
 
 const Side_by_side: React.FC<IProps> = ({
+  id,
   img,
   btn_text,
+  btn_to = "/register",
   text_p,
   text_h1,
   reverse,
 }) => {
   return (
-    <div className="h-fit container w-full mx-auto py-12 px-12 flex flex-col bg-gray-100 items-center">
+    <section
+      id={id}
+      className="w-full py-12 px-6 sm:px-12 flex flex-col bg-gray-100 items-center"
+    >
       <div
-        className={`flex flex-col mb-8  sm:mt-8 mt-6 ${
+        className={`container flex flex-col mb-8 mt-6 ${
           reverse ? "lg:flex-row-reverse" : "lg:flex-row"
-        } items-center justify-center gap-x-24`}
+        } items-center justify-center gap-x-24 gap-y-6`}
       >
-        {/* <!-- Image --> */}
-        <div className="flex flex-1 justify-center sm:mb-10 mb-4  lg:mb-0">
-          <img
-            className="w-full h-5/6 sm:w-3/4 sm:h-3/4 md:w-full sm:mb-0 md:h-full"
-            src={img}
-            alt=""
-          />
+        <div className="flex flex-1 justify-center">
+          <img className="w-full sm:w-3/4 md:w-full" src={img} alt="" />
         </div>
-        {/* <!-- Content --> */}
-        <div className="flex py-1 px-3 flex-1 flex-col sm:gap-5 gap-3 items-center lg:items-start">
-          <h1 className="sm:text-5xl text-3xl leading-10 text-center sm:text-left font-Poppins font-bold text-indigo-500">
+        <div className="flex px-3 flex-1 flex-col sm:gap-5 gap-3 items-center lg:items-start">
+          <h2 className="sm:text-5xl text-3xl leading-tight text-center lg:text-left font-Poppins font-bold text-indigo-500">
             {text_h1}
-          </h1>
-          <p className="text-gray-500 font-Poppins text-md sm:text-lg my-2 sm:my-4 text-center lg:text-left sm:w-3/4 lg:w-3/4">
+          </h2>
+          <p className="text-gray-500 font-Poppins text-md sm:text-lg my-2 sm:my-4 text-center lg:text-left lg:w-3/4">
             {text_p}
           </p>
-          <button className="text-sm text-center mb-12 sm:mt-0 mt-4">
-            {btn_text}
-            <i className="text-sm text-center ml-1 text-white fas fa-angle-right"></i>
-          </button>
+          {btn_text && (
+            <Link to={btn_to}>
+              <button type="button" className="text-sm">
+                {btn_text}
+                <i
+                  className="text-sm ml-1 text-white fas fa-angle-right"
+                  aria-hidden="true"
+                ></i>
+              </button>
+            </Link>
+          )}
         </div>
       </div>
-      {/* <!-- Rounded Rectangle --> */}
-      {/* <div className={`${reverse ? "reverse" : "no_reverse"}`}></div> */}
-    </div>
+    </section>
   );
 };
 

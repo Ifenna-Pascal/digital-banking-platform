@@ -1,72 +1,44 @@
-// all imports
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
-const Hash = require('../../utility/bycrpt_hashing');
 
-// user detail parent schema definition
-const userSchema = new Schema({
-    first_name: {
-        type: String,
-        required: [true, 'firstname is required'],
-    },
-    last_name: {
-        type: String,
-        required: [true, 'lastname is required'],
-    },
-    email: {
-        type: Schema.Types.String,
-        required: [true, 'please add an email'],
-        unique: true,
-        lowercase: true,
-        trim: true,
-        validate: {
-            validator: function (value) {
-                return /^([\w-\.]+@([\w-]+\.)+[\w-]{2,4})?$/.test(value);
-            },
-            message: 'please enter a valid email',
-        },
-    },
-
-    password: {
-        type: Schema.Types.String,
-        minlength: 6,
-    },
-
-    role: {
-        type: String,
-        required: true,
-        enum: ['admin', 'user'],
-        default: 'user',
-    },
-
-    isActive: {
-        type: Boolean,
-        default: true,
-    },
-
-    transaction_pin: {
-        type: String,
-    },
-
-    account_details: {
-        account_balance: {
-            type: Number,
-            required: true,
-            default: 0,
-        },
-        account_number: {
+const userSchema = new Schema(
+    {
+        first_name: { type: String, required: [true, 'firstname is required'], trim: true },
+        last_name: { type: String, required: [true, 'lastname is required'], trim: true },
+        email: {
             type: String,
-            required: true,
+            required: [true, 'please add an email'],
+            unique: true,
+            lowercase: true,
+            trim: true,
+            match: [/^[^\s@]+@[^\s@]+\.[^\s@]+$/, 'please enter a valid email'],
+        },
+        // bcrypt hash; empty until the customer finishes account setup
+        password: { type: String, select: false },
+        role: { type: String, required: true, enum: ['admin', 'user'], default: 'user' },
+        isActive: { type: Boolean, default: true },
+        // bcrypt hash of the 4-digit transaction PIN
+        transaction_pin: { type: String, select: false },
+        // bcrypt hash of the one-time code used to set the first password
+        setup_token: { type: String, select: false },
+        setup_token_expires: { type: Date, select: false },
+        account_details: {
+            account_balance: { type: Number, required: true, default: 0, min: 0 },
+            account_number: { type: String, required: true, unique: true },
         },
     },
+    { timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' } },
+);
 
-    created_at: {
-        type: Date,
-        default: new Date(),
-    },
-
-    updated_at: {
-        type: Date,
+// never send secrets back to clients, even if a query selected them
+userSchema.set('toJSON', {
+    transform: (_doc, ret) => {
+        delete ret.password;
+        delete ret.transaction_pin;
+        delete ret.setup_token;
+        delete ret.setup_token_expires;
+        delete ret.__v;
+        return ret;
     },
 });
 

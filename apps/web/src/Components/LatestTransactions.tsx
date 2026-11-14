@@ -1,29 +1,39 @@
 import React from "react";
+import { Link } from "react-router-dom";
+import { Transaction } from "../types";
 import EachTransaction from "./EachTransaction";
-import { Transactions } from "./sideUtil";
 
-function LatestTransactions() {
+function LatestTransactions({ transactions }: { transactions: Transaction[] }) {
   return (
-    <>
-      <div className="flex flex-col my-6 p-8 h-1/2 no-scrollbar overflow-y-scroll">
-        <h1 className="text-2xl text-gray-600 tracking-wide font-Poppins font-semibold mb-3">
-          Latest Transactions
-        </h1>
-        <div>
-          {Transactions.map((transaction, index) => (
-            <EachTransaction
-              amount={transaction.amount}
-              day={transaction.day}
-              month={transaction.month}
-              type={transaction.type}
-              details={transaction.details}
-            />
-          ))}
-        </div>
+    <div>
+      <div className="flex items-baseline justify-between mb-3">
+        <h2 className="text-2xl text-gray-600 font-Poppins font-semibold">
+          Latest transactions
+        </h2>
+        <Link
+          to="/dashboard/transactions"
+          className="text-indigo-500 font-Poppins"
+        >
+          See all
+        </Link>
       </div>
-    </>
+      {transactions.length === 0 ? (
+        <p className="text-gray-500 py-6">
+          No transactions yet.{" "}
+          <Link to="/dashboard/deposit" className="text-indigo-500">
+            Make a deposit
+          </Link>{" "}
+          to get started.
+        </p>
+      ) : (
+        <ul className="p-0 m-0">
+          {transactions.map((t) => (
+            <EachTransaction key={t._id} transaction={t} />
+          ))}
+        </ul>
+      )}
+    </div>
   );
 }
 
 export default LatestTransactions;
-LatestTransactions;
